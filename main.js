@@ -13,7 +13,8 @@ let map = L.map("map", {
 
 // thematische Layer
 let themaLayer = {
-  stations: L.featureGroup().addTo(map)
+  stations: L.featureGroup().addTo(map),
+  temperature: L.featureGroup().addTo(map),
 }
 
 // Hintergrundlayer
@@ -24,15 +25,30 @@ L.control.layers({
   }).addTo(map),
   "Openstreetmap": L.tileLayer.provider("OpenStreetMap.Mapnik"),
   "Esri WorldTopoMap": L.tileLayer.provider("Esri.WorldTopoMap"),
-  "Esri WorldImagery": L.tileLayer.provider("Esri.WorldImagery")
+  "Esri WorldImagery": L.tileLayer.provider("Esri.WorldImagery"),
 }, {
-  "Wetterstationen": themaLayer.stations
+  "Wetterstationen": themaLayer.stations,
+  "Temperatur": themaLayer.temperature,
 }).addTo(map);
 
 // Maßstab
 L.control.scale({
   imperial: false,
 }).addTo(map);
+
+function showtemperature(geojson) {
+  L.geoJSON(geojson, {
+    pointToLayer: function (feature, latlng) {
+      return L.marker(latlng, {
+        icon: L.divIcon({
+          className: "aws-div-icon", 
+          html: `<span>${feature.properties.LT}</span>`
+        })
+      })
+    }
+  }).addTo(themaLayer.temperature);
+}
+
 
 // GeoJSON der Wetterstationen laden
 async function showStations(url) {
@@ -51,8 +67,7 @@ async function showStations(url) {
       });
     },
     onEachFeature: function (feature, layer) {
-      //console.log(feature);
-      //console.log(feature.properties.name);
+      var pointInTime = new Date(feature.properties.date);
       layer.bindPopup(`
             <h4><p> ${feature.properties.name} (${feature.geometry.coordinates[2]}m)</p></h4>
             <ul>
@@ -61,11 +76,11 @@ async function showStations(url) {
             <li>Windgeschwindigkeit (km/h): ${feature.properties.WG != undefined ? feature.properties.WG.toFixed(1) : "-"}</li>
             <li>Schneehöhe (cm): ${feature.properties.HS != undefined ? feature.properties.HS.toFixed(0) : "-"} </li>
             </ul>
-            <p>${feature.properties.date}</p>
+            <span>${pointInTime.toLocaleString()}</span>
             `)
-      // Stimmt .WG und .GS_O wirklich? die Werte sehen nicht richtig aus?...
     }
   }).addTo(themaLayer.stations);
+  showtemperature(geojson);
 }
 
 showStations("https://static.avalanche.report/weather_stations/stations.geojson");
