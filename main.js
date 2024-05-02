@@ -40,7 +40,7 @@ L.control.scale({
 
 function getColor(value, ramp) {
   for (var rule of ramp) {
-    if (value >= rule.min && value <rule.max) {
+    if (value >= rule.min && value < rule.max) {
       return rule.color;
     }
   }
@@ -77,8 +77,8 @@ function showWind(geojson) {
       var color = getColor(feature.properties.WG, COLORS.wind)
       return L.marker(latlng, {
         icon: L.divIcon({
-          className: "aws-div-icon",
-          html: `<span style ="background-color: ${color};">${feature.properties.WG.toFixed(1)}</span>`
+          className: "aws-div-icon-wind",
+          html: `<span title="${feature.properties.WG.toFixed(1)} km/h"><i style="transform:rotate(${feature.properties.WR}deg); color: ${color}" class="fa-solid fa-circle-arrow-down"></i></span>`
         })
       })
     }
