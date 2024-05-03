@@ -15,7 +15,8 @@ let map = L.map("map", {
 let themaLayer = {
   stations: L.featureGroup(),
   temperature: L.featureGroup(),
-  wind: L.featureGroup().addTo(map),
+  wind: L.featureGroup(),
+  snowheight: L.featureGroup().addTo(map),
 }
 
 // Hintergrundlayer
@@ -86,6 +87,25 @@ function showWind(geojson) {
 }
 
 
+function showSnow (geojson) {
+  L.geoJSON(geojson, {
+    filter: function (feature) {
+      if (feature.properties.HS > 0 && feature.properties.HS < 1000) {
+        return true;
+      }
+    },
+    pointToLayer: function (feature, latlng) {
+      var color = getColor(feature.properties.HS, COLORS.snowheight)
+      return L.marker(latlng, {
+        icon: L.divIcon({
+          className: "aws-div-icon",
+          html: `<span style ="background-color: ${color};">${feature.properties.HS.toFixed(1)}</span>`
+        })
+      })
+    }
+  }).addTo(themaLayer.snowheight);
+}
+
 // GeoJSON der Wetterstationen laden
 async function showStations(url) {
   //console.log("Loading", url)
@@ -118,6 +138,7 @@ async function showStations(url) {
   }).addTo(themaLayer.stations);
   showtemperature(geojson);
   showWind(geojson);
+  showSnow(geojson);
 }
 
 showStations("https://static.avalanche.report/weather_stations/stations.geojson");
