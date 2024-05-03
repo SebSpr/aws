@@ -32,6 +32,7 @@ L.control.layers({
   "Wetterstationen": themaLayer.stations,
   "Temperatur (°C)": themaLayer.temperature,
   "Wind (km/h)": themaLayer.wind,
+  "Schneehöhe (cm)": themaLayer.snowheight,
 }).addTo(map);
 
 // Maßstab
@@ -87,7 +88,7 @@ function showWind(geojson) {
 }
 
 
-function showSnow (geojson) {
+function showSnow(geojson) {
   L.geoJSON(geojson, {
     filter: function (feature) {
       if (feature.properties.HS > 0 && feature.properties.HS < 1000) {
@@ -144,3 +145,14 @@ async function showStations(url) {
 showStations("https://static.avalanche.report/weather_stations/stations.geojson");
 
 
+// Change default options
+L.control.rainviewer({
+  position: 'bottomleft',
+  nextButtonText: '>',
+  playStopButtonText: 'Play/Stop',
+  prevButtonText: '<',
+  positionSliderLabelText: "Hour:",
+  opacitySliderLabelText: "Opacity:",
+  animationInterval: 500,
+  opacity: 0.5
+}).addTo(map);
